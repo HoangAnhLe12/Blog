@@ -1,0 +1,129 @@
+<div class="mt-4">
+   <a href="/me/stored/courses">Back to your courses</a>
+   <h3>Trashed courses</h3>
+   <table class="table mt-4">
+      <thead>
+         <tr>
+            <th scope="col">STT</th>
+            <th scope="col">Name</th>
+            <th scope="col">Description</th>
+            <th scope="col">VideoId</th>
+            <th scope="col " colspan="2">DeletedAt</th>
+         </tr>
+      </thead>
+      <tbody>
+         {{#each courses}}
+         <tr>
+            <th scope="row">{{sum @index 1}}</th>
+            <td>{{this.name}}</td>
+            <td>{{this.description}}</td>
+            <td>{{this.videoId}}</td>
+            <td>{{this.deletedAt}}</td>
+            <td>
+               <a
+                  data-bs-toggle="modal"
+                  data-bs-target="#restore-course-modal"
+                  data-id="{{this._id}}"
+                  class="btn btn-link btn-restore"
+                  >Restore</a
+               >
+            </td>
+            <td>
+               <a
+                  data-bs-toggle="modal"
+                  data-bs-target="#delete-course-modal"
+                  class="btn btn-link"
+                  data-id="{{this._id}}"
+                  >Delete Forever</a
+               >
+            </td>
+         </tr>
+         {{else}}
+         <tr>
+            <td colspan="6" class="text-center">
+               Trash empty
+               <a href="/stored/courses">Your courses</a>
+            </td>
+         </tr>
+         {{/each}}
+      </tbody>
+   </table>
+</div>
+
+{{! confirm delete }}
+
+<!-- Delete Modal -->
+<div class="modal fade" id="delete-course-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Confirm Delete</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+         </div>
+         <div class="modal-body">This course will be deleted forever. Are you sure?</div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-danger">OK</button>
+         </div>
+      </div>
+   </div>
+</div>
+
+<!-- Restore Modal -->
+<div class="modal fade" id="restore-course-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+   <div class="modal-dialog">
+      <div class="modal-content">
+         <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Confirm Delete</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+         </div>
+         <div class="modal-body">Are you sure to restore this course?</div>
+         <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-restore btn-danger">OK</button>
+         </div>
+      </div>
+   </div>
+</div>
+
+{{!-- Delete hidden form --}}
+
+<form method="POST" name="delete-course-form"></form>
+<form method="POST" name="restore-course-form"></form>
+
+<script>
+   const deleteModal = document.getElementById('delete-course-modal');
+   const deleteForm = document.forms['delete-course-form'];
+   if (deleteModal) {
+      deleteModal.addEventListener('show.bs.modal', (event) => {
+         // Button that triggered the modal
+         const button = event.relatedTarget;
+         // Extract info from data-id* attributes
+         const id = button.getAttribute('data-id');
+
+         const btnDeleteCourse = deleteModal.querySelector('.btn-danger');
+
+         btnDeleteCourse.onclick = () => {
+            deleteForm.action = '/courses/' + id + '/force?_method=DELETE';
+            deleteForm.submit();
+         };
+      });
+   }
+   const restoreModal = document.getElementById('restore-course-modal');
+   const restoreForm = document.forms['restore-course-form'];
+   if (restoreModal) {
+      restoreModal.addEventListener('show.bs.modal', (event) => {
+         // Button that triggered the modal
+         const button = event.relatedTarget;
+         // Extract info from data-id* attributes
+         const id = button.getAttribute('data-id');
+
+         const btnRestoreCourse = restoreModal.querySelector('.btn-restore');
+
+         btnRestoreCourse.onclick = () => {
+            restoreForm.action = '/courses/' + id + '/restore?_method=PATCH';
+            restoreForm.submit();
+         };
+      });
+   }
+</script>
