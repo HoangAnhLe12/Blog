@@ -2,14 +2,17 @@ const Course = require('../models/Course');
 
 class MeController {
    // [GET] /me/stored/courses
-   async storedCourses(req, res, next) {
-      try {
-         const courses = await Course.find({}).lean();
-         const deleteCount = await Course.countDocumentsWithDeleted({ deleted: true });
-         res.render('me/storedCourses', { courses, deleteCount });
-      } catch (next) {
-         next();
-      }
+   storedCourses(req, res, next) {
+      let courses = Course.find({}).lean();
+
+      Promise.all([courses.sortable(req), Course.countDocumentsWithDeleted({ deleted: true })])
+         .then(([courses, deleteCount]) =>
+            res.render('me/storedCourses', {
+               courses,
+               deleteCount,
+            }),
+         )
+         .catch(next);
    }
 
    // [GET] /me/trash/courses
